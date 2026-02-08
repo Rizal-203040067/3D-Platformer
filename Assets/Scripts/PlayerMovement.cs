@@ -11,7 +11,7 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] float movementSpeed = 6f;
     [SerializeField] float rotationSpeed = 10f;
-    [SerializeField] float jumpForce = 5f;
+    [SerializeField] float jumpForce = 5.2f;
 
     [SerializeField] Transform groundCheck;
     [SerializeField] LayerMask groundLayer;
@@ -60,6 +60,7 @@ public class PlayerMovement : MonoBehaviour
     void Jump()
     {
         rb.velocity = new Vector3(rb.velocity.x, jumpForce, rb.velocity.z);
+        animator.SetTrigger("Jump");
     }
 
     private void OnCollisionEnter(Collision collision)
