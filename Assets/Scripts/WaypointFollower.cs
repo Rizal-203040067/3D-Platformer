@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WaypointFollower : MonoBehaviour
@@ -9,17 +7,27 @@ public class WaypointFollower : MonoBehaviour
 
     [SerializeField] float speed = 5f;
 
+    [SerializeField] Animator animator; // optional
+
     void Update()
     {
-        if (Vector3.Distance(transform.position, waypoints[currentWaypointIndex].transform.position) < .1f)
+        Vector3 target = waypoints[currentWaypointIndex].transform.position;
+
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            target,
+            speed * Time.deltaTime
+        );
+
+        if (Vector3.Distance(transform.position, target) < 0.1f)
         {
-            currentWaypointIndex++;
-            if (currentWaypointIndex >= waypoints.Length)
-            {
-                currentWaypointIndex = 0;
-            }
+            currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
         }
 
-        transform.position = Vector3.MoveTowards(transform.position, waypoints[currentWaypointIndex].transform.position, speed * Time.deltaTime);
+        //  SAFE animation call
+        if (animator != null)
+        {
+            animator.SetFloat("Speed", speed);
+        }
     }
 }
