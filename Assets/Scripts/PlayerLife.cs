@@ -7,6 +7,7 @@ public class PlayerLife : MonoBehaviour
 {
     [SerializeField] GameObject characterModel;
     bool isDead = false;
+    [SerializeField] AudioSource dieSound;
 
     private void Update()
     {
@@ -32,6 +33,7 @@ public class PlayerLife : MonoBehaviour
     {
         Invoke(nameof(ReloadLevel), 1.3f);
         isDead = true;
+        dieSound.Play();
     }
 
     void ReloadLevel()

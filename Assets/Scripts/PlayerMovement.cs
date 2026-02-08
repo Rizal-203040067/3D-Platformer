@@ -16,6 +16,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] Transform groundCheck;
     [SerializeField] LayerMask groundLayer;
 
+    [SerializeField] AudioSource JumpSound;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -53,7 +55,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetButtonDown("Jump") && IsGrounded())
         {
-            Jump();
+            Jump();            
         }
     }
 
@@ -61,6 +63,7 @@ public class PlayerMovement : MonoBehaviour
     {
         rb.velocity = new Vector3(rb.velocity.x, jumpForce, rb.velocity.z);
         animator.SetTrigger("Jump");
+        JumpSound.Play();
     }
 
     private void OnCollisionEnter(Collision collision)
