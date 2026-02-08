@@ -6,11 +6,23 @@ using UnityEngine.SceneManagement;
 public class PlayerLife : MonoBehaviour
 {
     [SerializeField] GameObject characterModel;
+    bool isDead = false;
+
+    private void Update()
+    {
+        if (transform.position.y < -1f && !isDead)
+        {
+            Die();
+        }
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Enemy Body"))
         {
+            characterModel.SetActive(false);
+            GetComponent<Rigidbody>().isKinematic = true;
+            GetComponent<PlayerMovement>().enabled = false;
             Die();
         }
 
@@ -18,10 +30,8 @@ public class PlayerLife : MonoBehaviour
 
     void Die()
     {
-        characterModel.SetActive(false);
-        GetComponent<Rigidbody>().isKinematic = true;
-        GetComponent<PlayerMovement>().enabled = false;
         Invoke(nameof(ReloadLevel), 1.3f);
+        isDead = true;
     }
 
     void ReloadLevel()
