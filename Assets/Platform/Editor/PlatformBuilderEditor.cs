@@ -19,7 +19,8 @@ public class PlatformBuilderEditor : Editor
 
         if (GUILayout.Button("Clear Platform"))
         {
-            builder.SendMessage("Clear", SendMessageOptions.DontRequireReceiver);
+            builder.Clear();
         }
+
     }
 }
