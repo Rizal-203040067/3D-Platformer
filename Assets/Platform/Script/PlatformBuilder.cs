@@ -13,6 +13,11 @@ public class PlatformBuilder : MonoBehaviour
 
     public void Build()
     {
+        #if UNITY_EDITOR
+                if (Application.isPlaying)
+                    return;
+        #endif
+
         Clear();
 
         for (int z = 0; z < depth; z++)
@@ -31,6 +36,9 @@ public class PlatformBuilder : MonoBehaviour
                 Instantiate(prefab, position, rotation, transform);
             }
         }
+
+        UpdateCollider();
+
     }
 
     GameObject GetTile(int x, int z)
@@ -81,7 +89,51 @@ public class PlatformBuilder : MonoBehaviour
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
+        #if UNITY_EDITOR
             DestroyImmediate(transform.GetChild(i).gameObject);
+        #else
+            Destroy(transform.GetChild(i).gameObject);
+        #endif
         }
     }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+
+        for (int z = 0; z < depth; z++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                Vector3 pos = transform.position + new Vector3(
+                    (x - (width / 2)) * tileSize,
+                    0f,
+                    -z * tileSize
+                );
+
+                Gizmos.DrawWireCube(pos, Vector3.one * tileSize);
+            }
+        }
+    }
+
+    public void UpdateCollider()
+    {
+        BoxCollider col = GetComponent<BoxCollider>();
+        if (!col)
+            col = gameObject.AddComponent<BoxCollider>();
+
+        col.center = new Vector3(
+            0f,
+            0f,
+            -(depth - 1) * tileSize * 0.5f
+        );
+
+        col.size = new Vector3(
+            width * tileSize,
+            tileSize,
+            depth * tileSize
+        );
+    }
+
+
 }
