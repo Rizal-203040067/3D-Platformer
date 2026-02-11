@@ -5,21 +5,35 @@ public class PlatformBuilder : MonoBehaviour
     public int width = 3;
     public int depth = 3;
 
+    [Header("3D Tiles")]
     public GameObject cornerTile;
     public GameObject sideTile;
     public GameObject centerTile;
+
+    [Header("2D Tiles (For Thin Platforms)")]
+    public GameObject centerTile2D;
+    public GameObject endTile2D;
 
     public float tileSize = 2f; // IMPORTANT
 
     public void Build()
     {
-        #if UNITY_EDITOR
-                if (Application.isPlaying)
-                    return;
-        #endif
+#if UNITY_EDITOR
+        if (Application.isPlaying)
+            return;
+#endif
 
         Clear();
 
+        //  Thin platform check
+        if (width == 1 || depth == 1)
+        {
+            BuildThinPlatform();
+            UpdateCollider();
+            return;
+        }
+
+        //  Normal platform
         for (int z = 0; z < depth; z++)
         {
             for (int x = 0; x < width; x++)
@@ -38,7 +52,55 @@ public class PlatformBuilder : MonoBehaviour
         }
 
         UpdateCollider();
+    }
 
+    //  NEW — Thin Platform Builder
+    void BuildThinPlatform()
+    {
+        int length = Mathf.Max(width, depth);
+
+        for (int i = 0; i < length; i++)
+        {
+            Vector3 position;
+
+            if (width == 1) // Vertical strip
+            {
+                position = new Vector3(
+                    0f,
+                    0f,
+                    -i * tileSize
+                );
+            }
+            else // Horizontal strip
+            {
+                position = new Vector3(
+                    (i - (length / 2)) * tileSize,
+                    0f,
+                    0f
+                );
+            }
+
+            GameObject prefab =
+                (i == 0 || i == length - 1)
+                ? endTile2D
+                : centerTile2D;
+
+            Quaternion rotation = GetThinRotation();
+
+            Instantiate(prefab, position, rotation, transform);
+        }
+    }
+
+    Quaternion GetThinRotation()
+    {
+        Vector3 rot = new Vector3(-90f, 0f, 0f);
+
+        if (width == 1)
+            rot.y = 0f;      // Vertical platform
+        else
+            rot.y = 90f;     // Horizontal platform
+
+        return Quaternion.Euler(rot);
     }
 
     GameObject GetTile(int x, int z)
@@ -64,23 +126,17 @@ public class PlatformBuilder : MonoBehaviour
         bool top = z == 0;
         bool bot = z == depth - 1;
 
-        // ALL tiles need X = -90
         Vector3 rot = new Vector3(-90f, 0f, 0f);
 
-        // ---- CORNERS ----
         if (left && top) rot.y = -90f;
         else if (right && top) rot.y = 0f;
         else if (left && bot) rot.y = 180f;
         else if (right && bot) rot.y = 90f;
 
-        // ---- SIDES ----
         else if (top) rot.y = 0f;
         else if (bot) rot.y = 180f;
         else if (left) rot.y = -90f;
         else if (right) rot.y = 90f;
-
-        // ---- CENTER ----
-        // rot already correct (-90, 0, 0)
 
         return Quaternion.Euler(rot);
     }
@@ -89,11 +145,11 @@ public class PlatformBuilder : MonoBehaviour
     {
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
             DestroyImmediate(transform.GetChild(i).gameObject);
-        #else
+#else
             Destroy(transform.GetChild(i).gameObject);
-        #endif
+#endif
         }
     }
 
@@ -129,11 +185,9 @@ public class PlatformBuilder : MonoBehaviour
         );
 
         col.size = new Vector3(
-            width * tileSize,
+            Mathf.Max(1, width) * tileSize,
             tileSize,
-            depth * tileSize
+            Mathf.Max(1, depth) * tileSize
         );
     }
-
-
 }
